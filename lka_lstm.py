@@ -39,9 +39,10 @@ class LKA_LSTM(nn.Module):
         self.l0v = nn.Linear(in_sz, hid_sz*n_h )
         self.lstm = nn.LSTM(hid_sz, hid_sz, batch_first=True )
         self.l1 = nn.Linear(hid_sz*n_h, out_sz )
+        self.l2 = nn.Linear(out_sz, out_sz )
         self.n_h = n_h
         self.hid_sz = hid_sz
-        #self.ln = nn.LayerNorm(out_sz)
+        self.ln = nn.LayerNorm(out_sz)
 
 
     def forward(self, x ):
@@ -60,8 +61,9 @@ class LKA_LSTM(nn.Module):
 
         o = o.view(b, n_h, -1, hid_sz ).permute(0,2,1,3).reshape(b, -1, hid_sz*n_h )
         o  = self.l1(o)
+        o  = self.l2(F.gelu(o))
 
-        return o #self.ln(o)
+        return self.ln(o)
 
 
 
